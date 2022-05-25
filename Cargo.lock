@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "league-locale-mod"
+name = "league-locale-patcher"
 version = "0.1.0"
 dependencies = [
  "serde_yaml",
