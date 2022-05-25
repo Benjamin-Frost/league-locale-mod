@@ -1,15 +1,16 @@
 use std::io::Write;
 
 fn main() {
-    let default_path = "C:\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml";
+    let default_path = "C:\\Riot Games\\League of Legends";
     // Get User Inputs
-    let mut config_path = get_user_input(&format!(
-        "📁 Path to config file (leave empty for {})",
+    let mut league_path = get_user_input(&format!(
+        "📁 Path to League (leave empty for {})",
         &default_path
     ));
-    if config_path.is_empty() {
-        config_path = default_path.to_string();
+    if league_path.is_empty() {
+        league_path = default_path.to_string();
     }
+    let config_path = format!("{}\\Config\\LeagueClientSettings.yaml", league_path);
     assert_path_exists(&config_path);
     let region = get_user_input("🌎 Region");
     let locale = get_user_input("💬 Locale");
@@ -34,6 +35,12 @@ fn main() {
         std::fs::File::create(&config_path).expect("❌ Could not open config file");
     serde_yaml::to_writer(config_file_writer, &config_values)
         .expect("❌ Could not write to config file");
+
+    // Launch League
+    let league_executable = format!("{}\\League of Legends.exe", league_path);
+    std::process::Command::new(&league_executable)
+        .spawn()
+        .expect("❌ Could not launch League");
 
     // Done
     println!("🚀 Done");
