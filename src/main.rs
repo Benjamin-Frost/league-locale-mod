@@ -1,62 +1,50 @@
-use std::fs::File;
-use std::io;
-use std::path::Path;
-use std::process;
+use std::io::Write;
 
 fn main() {
-    let config_path = get_config_path();
-    let desired_locale = get_desired_locale();
-    let desired_region = get_desired_region();
+    // Get User Inputs
+    let config_path = get_user_input("Path to config file");
+    assert_path_exists(&config_path);
+    let locale = get_user_input("Locale");
+    let region = get_user_input("Region");
 
-    let f = File::open(&config_path).unwrap();
-    let mut value: serde_yaml::Value = serde_yaml::from_reader(f).unwrap();
+    // Open Config File
+    let config_file_reader = std::fs::File::open(&config_path).expect("Could not open config file");
+    let mut config_values: serde_yaml::Value =
+        serde_yaml::from_reader(config_file_reader).expect("Could not parse config file");
 
-    let globals = value
+    // Read relevant values, write user input
+    let globals = config_values
         .get_mut("install")
         .unwrap()
         .get_mut("globals")
         .unwrap();
-    *globals.get_mut("locale").unwrap() = desired_locale.into();
-    *globals.get_mut("region").unwrap() = desired_region.into();
+    *globals.get_mut("locale").unwrap() = locale.into();
+    *globals.get_mut("region").unwrap() = region.into();
 
-    let writer = File::create(&config_path).unwrap();
-    serde_yaml::to_writer(writer, &value).unwrap();
+    // Write to file
+    let config_file_writer =
+        std::fs::File::create(&config_path).expect("Could not open config file");
+    serde_yaml::to_writer(config_file_writer, &config_values)
+        .expect("Could not write to config file");
 
+    // Done
     println!("Done");
 }
 
-fn get_config_path() -> String {
+fn get_user_input(request: &str) -> String {
     let mut input = String::new();
-    println!("Enter your config path:");
-    io::stdin()
+    print!("{}: ", request);
+    std::io::stdout().flush().unwrap();
+    std::io::stdin()
         .read_line(&mut input)
-        .ok()
         .expect("Failed to read line");
-    input = input.trim().to_string();
-    let exists = Path::new(&input).exists();
+    input.trim().to_string()
+}
+
+fn assert_path_exists(path: &str) {
+    let exists = std::path::Path::new(path).exists();
     if !exists {
         println!("Path does not exist");
-        process::exit(1);
+        std::process::exit(1);
     }
-    input
-}
-
-fn get_desired_locale() -> String {
-    let mut input = String::new();
-    println!("Enter your desired locale:");
-    io::stdin()
-        .read_line(&mut input)
-        .ok()
-        .expect("Failed to read line");
-    input.trim().to_string()
-}
-
-fn get_desired_region() -> String {
-    let mut input = String::new();
-    println!("Enter your desired region:");
-    io::stdin()
-        .read_line(&mut input)
-        .ok()
-        .expect("Failed to read line");
-    input.trim().to_string()
 }
