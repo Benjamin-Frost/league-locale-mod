@@ -1,8 +1,15 @@
 use std::io::Write;
 
 fn main() {
+    let default_path = "C:\\Riot Games\\League of Legends\\Config\\LeagueClientSettings.yaml";
     // Get User Inputs
-    let config_path = get_user_input("📁 Path to config file");
+    let mut config_path = get_user_input(&format!(
+        "📁 Path to config file (leave empty for {})",
+        &default_path
+    ));
+    if config_path.is_empty() {
+        config_path = default_path.to_string();
+    }
     assert_path_exists(&config_path);
     let region = get_user_input("🌎 Region");
     let locale = get_user_input("💬 Locale");
