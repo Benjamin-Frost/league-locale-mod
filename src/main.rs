@@ -37,7 +37,7 @@ fn main() {
         .expect("❌ Could not write to config file");
 
     // Launch League
-    let league_executable = format!("{}\\League of Legends.exe", league_path);
+    let league_executable = format!("{}\\LeagueClient", league_path);
     std::process::Command::new(&league_executable)
         .spawn()
         .expect("❌ Could not launch League");
